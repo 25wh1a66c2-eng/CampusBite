@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import FoodCard from '../components/FoodCard';
-import api from '../services/api';
+import foodService from '../services/foodService';
+import { getLocalProducts } from '../data/defaultProducts';
 
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Pre-seed with local cached food items so items appear instantly without waiting
+  const [featuredProducts, setFeaturedProducts] = useState(() => {
+    const initial = getLocalProducts();
+    return Array.isArray(initial) && initial.length > 0 ? initial.slice(0, 6) : [];
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function loadProducts() {
       try {
-        setLoading(true);
-        const res = await api.get('/products');
-        setFeaturedProducts(res.data.slice(0, 6)); // Top 6 featured
+        const items = await foodService.getProducts();
+        if (Array.isArray(items) && items.length > 0) {
+          setFeaturedProducts(items.slice(0, 6));
+        }
       } catch (err) {
         console.error('Failed to load featured products:', err);
       } finally {

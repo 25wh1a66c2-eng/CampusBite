@@ -1,18 +1,38 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import FoodCard from '../components/FoodCard';
-import api from '../services/api';
+import foodService from '../services/foodService';
+import { getLocalProducts, filterProductsLocally } from '../data/defaultProducts';
 
 export default function Menu() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Filter states initialized from URL params if available
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [selectedFoodType, setSelectedFoodType] = useState(searchParams.get('foodType') || 'All');
+
+  // Pre-seed products state immediately so food items appear instantly without waiting
+  const [products, setProducts] = useState(() => {
+    const initial = getLocalProducts();
+    const cat = searchParams.get('category') || 'All';
+    const type = searchParams.get('foodType') || 'All';
+    const search = searchParams.get('search') || '';
+    return filterProductsLocally(initial, { search, category: cat, foodType: type });
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Sync state when URL searchParams changes
+  useEffect(() => {
+    const urlCategory = searchParams.get('category') || 'All';
+    const urlFoodType = searchParams.get('foodType') || 'All';
+    const urlSearch = searchParams.get('search') || '';
+    setSelectedCategory(urlCategory);
+    setSelectedFoodType(urlFoodType);
+    setSearchTerm(urlSearch);
+  }, [searchParams]);
 
   const categories = [
     'All',
@@ -34,16 +54,22 @@ export default function Menu() {
     try {
       setLoading(true);
       setError(null);
-
-      const params = {};
-      if (searchTerm.trim()) params.search = searchTerm.trim();
-      if (selectedCategory !== 'All') params.category = selectedCategory;
-      if (selectedFoodType !== 'All') params.foodType = selectedFoodType;
-
-      const response = await api.get('/products', { params });
-      setProducts(response.data);
+      const items = await foodService.getProducts({
+        search: searchTerm,
+        category: selectedCategory,
+        foodType: selectedFoodType,
+      });
+      setProducts(items);
     } catch (err) {
-      setError(err.message || 'Failed to load food catalogue');
+      console.warn('Error fetching food catalogue:', err);
+      // Fall back directly to local cache
+      const local = getLocalProducts();
+      const filtered = filterProductsLocally(local, {
+        search: searchTerm,
+        category: selectedCategory,
+        foodType: selectedFoodType,
+      });
+      setProducts(filtered);
     } finally {
       setLoading(false);
     }
@@ -205,12 +231,19 @@ export default function Menu() {
             <p className="text-muted max-w-md mx-auto mb-4">
               We couldn't find any dishes matching "{searchTerm || selectedCategory || selectedFoodType}". Try adjusting your category or food type filters.
             </p>
-            <div>
-              <button onClick={handleClearFilters} className="btn btn-warning rounded-pill px-4 me-2">
-                Clear Filters
+            <div className="d-flex flex-wrap justify-content-center gap-2">
+              <button
+                onClick={() => {
+                  handleClearFilters();
+                  const all = getLocalProducts();
+                  setProducts(all);
+                }}
+                className="btn btn-warning rounded-pill px-4"
+              >
+                <i className="bi bi-arrow-clockwise me-1"></i> View All Food Items ({getLocalProducts().length})
               </button>
               <Link to="/add-food" className="btn btn-outline-dark rounded-pill px-4">
-                Add This Dish
+                <i className="bi bi-plus-circle me-1"></i> Add or Sell Food
               </Link>
             </div>
           </div>

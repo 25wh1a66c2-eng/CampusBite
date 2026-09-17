@@ -7,6 +7,17 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// CORS & Preflight handling for seamless browser & iframe preview compatibility
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // In-Memory Database for Live Demo matching Spring Boot entities
 interface Product {
   id: number;
@@ -232,6 +243,32 @@ let products: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80',
     restaurantName: 'Sweet Treats Bakery',
     stock: 12,
+    available: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 13,
+    name: 'Fresh Green Detox Salad Bowl',
+    description: 'Crisp organic cucumber, cherry tomatoes, baby spinach, sprouted moong, roasted pumpkin seeds, and cold-pressed lemon-herb dressing.',
+    price: 85.0,
+    category: 'Healthy Food',
+    foodType: 'Vegan',
+    imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+    restaurantName: 'Juice Junction',
+    stock: 20,
+    available: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 14,
+    name: 'Paneer Protein Power Wrap',
+    description: 'Whole wheat flatbread rolled with grilled spiced paneer tikka, mixed bell peppers, shredded lettuce, and hung curd mint spread.',
+    price: 95.0,
+    category: 'Healthy Food',
+    foodType: 'Vegetarian',
+    imageUrl: 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=800&q=80',
+    restaurantName: 'Bistro 101',
+    stock: 25,
     available: true,
     createdAt: new Date().toISOString(),
   },

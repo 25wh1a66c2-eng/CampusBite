@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import foodService from '../services/foodService';
 import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
+
+const FALLBACK_FOOD_IMG =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400" fill="%23f8f9fa"><rect width="600" height="400" fill="%23f1f5f9"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-size="64">🍲</text><text x="50%" y="70%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="20" fill="%2364748b">Fresh Campus Dish</text></svg>';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -21,8 +24,8 @@ export default function ProductDetails() {
       try {
         setLoading(true);
         setError(null);
-        const response = await api.get(`/products/${id}`);
-        setProduct(response.data);
+        const data = await foodService.getProductById(id);
+        setProduct(data);
       } catch (err) {
         setError(err.message || 'Food item not found');
       } finally {
@@ -103,13 +106,15 @@ export default function ProductDetails() {
             <div className="col-lg-6">
               <div className="position-relative rounded-4 overflow-hidden shadow-sm" style={{ maxHeight: '420px' }}>
                 <img
-                  src={product.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'}
+                  src={product.imageUrl || FALLBACK_FOOD_IMG}
                   alt={product.name}
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
                   className="w-100 h-100 object-fit-cover"
                   style={{ minHeight: '320px', maxHeight: '420px' }}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+                    e.target.src = FALLBACK_FOOD_IMG;
                   }}
                 />
                 <div className="position-absolute top-0 start-0 p-3">

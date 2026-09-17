@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
 
+const FALLBACK_FOOD_IMG =
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250" fill="%23f8f9fa"><rect width="400" height="250" fill="%23f1f5f9"/><text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-size="44">🍲</text><text x="50%" y="70%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="16" fill="%2364748b">Campus Food Special</text></svg>';
+
 export default function FoodCard({ product }) {
   const { addToCart } = useCart();
   const { addNotification } = useNotification();
@@ -55,12 +58,14 @@ export default function FoodCard({ product }) {
       {/* Image with Category & Food Type Badges */}
       <div className="position-relative overflow-hidden" style={{ height: '190px' }}>
         <img
-          src={product.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'}
+          src={product.imageUrl || FALLBACK_FOOD_IMG}
           alt={product.name}
+          referrerPolicy="no-referrer"
+          loading="lazy"
           className="card-img-top w-100 h-100 object-fit-cover transition-transform"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+            e.target.src = FALLBACK_FOOD_IMG;
           }}
         />
         {/* Badges on top of image */}

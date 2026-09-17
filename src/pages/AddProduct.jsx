@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
-import api from '../services/api';
+import foodService from '../services/foodService';
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -98,8 +98,7 @@ export default function AddProduct() {
         available: formData.available,
       };
 
-      const response = await api.post('/products', payload);
-      const created = response.data;
+      const created = await foodService.addProduct(payload);
 
       addNotification(`"${created.name}" added to menu successfully!`, 'success', 'Food Item Added');
       navigate('/menu');
