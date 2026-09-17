@@ -1,0 +1,6 @@
+{
+  "name": "CampusBite – Smart Campus Food Ordering App",
+  "description": "Smart campus food ordering web application with menu catalog, cart, checkout, order tracking, and eco-friendly scoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
